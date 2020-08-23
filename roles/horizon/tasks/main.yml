@@ -1,0 +1,58 @@
+- name: installing openstack-dashboard
+  apt:
+    name: openstack-dashboard
+    state: present
+
+- name: setting up conf file
+  replace:
+    path: /etc/openstack-dashboard/local_settings.py
+    regexp: 'OPENSTACK_HOST\s+\=\s+"127\.0\.0\.1"'
+    replace: OPENSTACK_HOST = "controller"
+    backup: yes
+
+- name: setting up 
+  lineinfile:
+    path: /etc/openstack-dashboard/local_settings.py
+    insertbefore: CACHES\s+\=\s+\{
+    line: SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+- name: setting up conf file
+  replace:
+    path: /etc/openstack-dashboard/local_settings.py
+    regexp: 127\.0\.0\.1\:11211
+    replace: controller:11211
+
+- name: setting up conf file
+  replace:
+    path: /etc/openstack-dashboard/local_settings.py
+    regexp: '#OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT\s+\=\s+False'
+    replace: "OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True"
+
+
+- name: setting up conf file 2
+  blockinfile:
+    path: /etc/openstack-dashboard/local_settings.py
+    block: |
+      OPENSTACK_API_VERSIONS = {
+          "identity": 3,
+          "image": 2,
+          "volume": 2,
+      }
+    insertafter: '#OPENSTACK_API_VERSIONS = {'
+
+- name: setting up conf file
+  replace:
+    path: /etc/openstack-dashboard/local_settings.py
+    regexp: "#OPENSTACK_KEYSTONE_DEFAULT_DOMAIN"
+    replace: OPENSTACK_KEYSTONE_DEFAULT_DOMAIN
+
+- name: setting up conf file
+  replace:
+    path: /etc/openstack-dashboard/local_settings.py
+    regexp: 'OPENSTACK_KEYSTONE_DEFAULT_ROLE\s+\=\s+"_member_"'
+    replace: OPENSTACK_KEYSTONE_DEFAULT_ROLE = "user"
+
+- name: restarting apache
+  service: 
+    name: apache2
+    state: restarted

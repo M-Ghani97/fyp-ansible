@@ -1,0 +1,49 @@
+---
+- hosts: controller
+  become: true
+  user: ubuntu
+  gather_facts: true
+  roles:
+    - set_env_controller
+
+- hosts: compute
+  become: true
+  user: ubuntu
+  gather_facts: true
+  roles:
+    - set_env_compute
+
+- hosts: controller
+  become: true
+  user: ubuntu
+  gather_facts: true
+  roles:
+    - keystone
+    - glance
+    - nova
+  
+- hosts: compute
+  become: true
+  user: ubuntu
+  gather_facts: true
+  tasks:
+    - import_role:
+        name: nova
+        tasks_from: compute
+
+- hosts: controller
+  become: true
+  user: ubuntu
+  gather_facts: true
+  roles:
+    - horizon
+    - neutron
+
+- hosts: compute
+  become: true
+  user: ubuntu
+  gather_facts: true
+  tasks:
+    - import_role:
+        name: neutron
+        tasks_from: compute

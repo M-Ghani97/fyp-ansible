@@ -1,0 +1,189 @@
+- name: create DB
+  mysql_db:
+    name: neutron
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: adding user and granting privileges
+  mysql_user:
+    name: neutron
+    password: NEUTRON_DBPASS
+    priv: "neutron.*:ALL"
+    state: present
+    host: "{{item}}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop:
+    - 'localhost'
+    - '%'
+
+- name: creating neutron user, entity and API endpoints
+  command: 
+    cmd: "{{item}}"
+  loop:
+    - openstack user create --domain default --password 123 neutron
+    - openstack role add --project service --user neutron admin
+    - openstack service create --name neutron --description "OpenStack Networking" network
+    - openstack endpoint create --region RegionOne network public http://controller:9696
+    - openstack endpoint create --region RegionOne network internal http://controller:9696
+    - openstack endpoint create --region RegionOne network admin http://controller:9696
+  environment:
+    - OS_PROJECT_DOMAIN_NAME: Default
+    - OS_USER_DOMAIN_NAME: Default
+    - OS_PROJECT_NAME: admin
+    - OS_USERNAME: admin
+    - OS_PASSWORD: ADMIN_PASS
+    - OS_AUTH_URL: http://controller:5000/v3
+    - OS_IDENTITY_API_VERSION: 3
+    - OS_IMAGE_API_VERSION: 2
+
+- name: installing neutron components
+  apt:
+    name: "{{item}}"
+    state: present
+  loop:
+    - neutron-server 
+    - neutron-plugin-ml2
+    - neutron-linuxbridge-agent 
+    - neutron-l3-agent 
+    - neutron-dhcp-agent
+    - neutron-metadata-agent
+      
+- name: configuring server components
+  replace:
+    path: /etc/neutron/neutron.conf
+    regexp: connection\s+\=\s+sqlite\:////var/lib/neutron/neutron\.sqlite
+    replace: connection = mysql+pymysql://neutron:NEUTRON_DBPASS@controller/neutron
+    backup: yes
+
+- name: Deleting Default Configuration
+  lineinfile:
+    path: /etc/neutron/neutron.conf
+    regexp: '{{ item }}'
+    state: absent
+  loop:
+    - '\[DEFAULT\]'
+    - 'core_plugin\s+\=\s+ml2'
+
+- name: Adding Default Configuration
+  blockinfile: 
+    path: /etc/neutron/neutron.conf
+    insertbefore: BOF
+    block: |
+      [DEFAULT]
+      core_plugin = ml2
+      service_plugins = router
+      allow_overlapping_ips = true
+      transport_url = rabbit://openstack:RABBIT_PASS@controller
+      auth_strategy = keystone
+      notify_nova_on_port_status_changes = true
+      notify_nova_on_port_data_changes = true
+
+- name: Configuring neutron.conf
+  blockinfile:
+    path: /etc/neutron/neutron.conf
+    block: |
+      {{item.blk}}
+    insertafter: '{{item.insaft}}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.insaft}}"
+  loop:
+    - {blk: "www_authenticate_uri = http://controller:5000\nauth_url = http://controller:5000\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nproject_name = service\nusername = neutron\npassword = 123", insaft: '\[keystone_authtoken\]'}
+    - {blk: "auth_url = http://controller:5000\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nregion_name = RegionOne\nproject_name = service\nusername = nova\npassword = 123", insaft: '\[nova\]'}
+ 
+
+- name: oslo_concurrency
+  lineinfile:
+    path: /etc/neutron/neutron.conf
+    line: lock_path = /var/lib/neutron/tmp
+    insertafter: '\[oslo_concurrency\]'
+    state: present
+
+- name: Configure the Modular Layer 2 (ML2) plug-in
+  blockinfile:
+    path: /etc/neutron/plugins/ml2/ml2_conf.ini
+    backup: yes
+    block: |
+      {{item.blk}}
+    insertafter: '{{item.insaft}}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.insaft}}"
+  loop:
+    - {blk: "type_drivers = flat,vlan,vxlan\ntenant_network_types = vxlan\nmechanism_drivers = linuxbridge,l2population\nextension_drivers = port_security", insaft: '\[ml2\]'}
+    - {blk: "flat_networks = provider\n", insaft: '\[ml2_type_flat\]'}
+    - {blk: "vni_ranges = 1:1000\n", insaft: '\[ml2_type_vxlan\]'}
+    - {blk: "enable_ipset = true\n", insaft: '\[securitygroup\]'}
+
+
+- name: Configure the Modular Layer 2 (ML2) plug-in
+  blockinfile:
+    path: /etc/neutron/plugins/ml2/linuxbridge_agent.ini
+    backup: yes
+    block: |
+      {{item.blk}}
+    insertafter: '{{item.insaft}}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.insaft}}"
+  loop:
+    - {blk: "physical_interface_mappings = provider:{{ ansible_interfaces | difference(['lo',ansible_default_ipv4.interface]) | first }}", insaft: '\[linux_bridge\]'}
+    - {blk: "enable_vxlan = true\nlocal_ip = {{ansible_default_ipv4.address}}\nl2_population = true", insaft: '\[vxlan\]'}
+    - {blk: "enable_security_group = true\nfirewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver", insaft: '\[securitygroup\]'}
+
+- name: Deleting Default Configuration
+  lineinfile:
+    path: '{{ item }}'
+    regexp: '\[DEFAULT\]'
+    state: absent
+    backup: yes
+  loop:
+    - /etc/neutron/l3_agent.ini
+    - /etc/neutron/dhcp_agent.ini 
+
+- name: Configure the layer-3 agent
+  blockinfile:
+    path: /etc/neutron/l3_agent.ini
+    insertbefore: BOF
+    block: |
+      [DEFAULT]
+      interface_driver = linuxbridge
+
+- name: Configure the DHCP agent
+  blockinfile:
+    path: /etc/neutron/dhcp_agent.ini
+    insertbefore: BOF
+    block: |
+      [DEFAULT]
+      interface_driver = linuxbridge
+      dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+      enable_isolated_metadata = true
+
+- name: Deleting Default Configuration
+  lineinfile:
+    path: /etc/neutron/metadata_agent.ini
+    regexp: '\[DEFAULT\]'
+    backup: yes
+    state: absent
+
+- name: Configure the metadata agent
+  blockinfile:
+    path: /etc/neutron/metadata_agent.ini
+    insertbefore: BOF
+    block: |
+      [DEFAULT]
+      nova_metadata_host = controller
+      metadata_proxy_shared_secret = METADATA_SECRET  
+
+# neutron section config is done in nova role
+
+- name: populating neutron database
+  command:
+    cmd: 'su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron'
+
+- name: Restarting Netwoking Services
+  service:
+    name: '{{ item }}'
+    state: restarted
+  loop:
+    - nova-api
+    - neutron-server
+    - neutron-linuxbridge-agent
+    - neutron-dhcp-agent
+    - neutron-metadata-agent
+    - neutron-l3-agent
+

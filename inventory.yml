@@ -1,0 +1,9 @@
+all:
+  children:
+    controller:
+      hosts:
+        3.89.146.196
+    compute:
+      hosts:
+        54.236.47.128
+

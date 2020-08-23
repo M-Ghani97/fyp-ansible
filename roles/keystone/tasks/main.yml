@@ -1,0 +1,98 @@
+---
+- name: create DB
+  mysql_db:
+        name: keystone 
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock 
+- name: adding user and granting privileges
+  mysql_user:
+        name: keystone
+        password: KEYSTONE_DBPASS
+        priv: "keystone.*:ALL"
+        state: present
+        host: "{{item}}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop:
+        - 'localhost'
+        - '%'
+- name: installing pakages
+  apt:
+        name: "{{item}}"
+        state: present
+  loop:
+        - keystone
+        - apache2
+        - libapache2-mod-wsgi
+- name: setting up conf file
+  replace:
+        path: /etc/keystone/keystone.conf
+        after: '[database]'
+        regexp: 'connection\s+\=\s+sqlite\:////var/lib/keystone/keystone\.db'
+        replace: 'connection = mysql+pymysql://keystone:KEYSTONE_DBPASS@controller/keystone'
+        backup: yes
+- name: setting up conf file1
+  lineinfile:
+      path: /etc/keystone/keystone.conf
+      insertafter: '\[token\]'
+      line: 'provider = fernet'
+      backup: yes
+- name: populating keystone database
+  command:
+        cmd: 'su -s /bin/sh -c "keystone-manage db_sync" keystone'
+- name: initializing repos
+  command:
+        cmd: '{{item}}'
+  loop:
+        - keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+        - keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+
+- name: bootstrap identity service
+  command:
+        cmd: keystone-manage bootstrap --bootstrap-password ADMIN_PASS --bootstrap-admin-url http://controller:5000/v3/ --bootstrap-internal-url http://controller:5000/v3/ --bootstrap-public-url http://controller:5000/v3/ --bootstrap-region-id RegionOne
+
+- name: configure apache2
+  lineinfile:
+        path: /etc/apache2/apache2.conf
+        line: ServerName controller
+        backup: yes
+- name: restart apache2
+  service:
+        name: apache2
+        state: restarted
+- name: creating domain, project, user and roles
+  command:
+        cmd: "{{item}}"
+  loop:                 
+        - openstack domain create --description "An Example Domain" example
+        - openstack project create --domain default --description "Service Project" service
+        - openstack project create --domain default --description "Demo Project" myproject
+        - openstack user create --domain default --password 123 myuser
+        - openstack role create myrole
+        - openstack role add --project myproject --user myuser myrole
+  environment: 
+        - OS_USERNAME: admin
+        - OS_PASSWORD: ADMIN_PASS
+        - OS_PROJECT_NAME: admin
+        - OS_USER_DOMAIN_NAME: Default
+        - OS_PROJECT_DOMAIN_NAME: Default
+        - OS_AUTH_URL: http://controller:5000/v3
+        - OS_IDENTITY_API_VERSION: 3
+- name: varifying operation
+  command:
+        cmd: "{{item}}"
+  loop:
+        - openstack --os-auth-url http://controller:5000/v3 --os-project-domain-name Default --os-user-domain-name Default --os-project-name admin --os-username admin --os-password ADMIN_PASS token issue
+        - openstack --os-auth-url http://controller:5000/v3 --os-project-domain-name Default --os-user-domain-name Default --os-project-name myproject --os-username myuser --os-password 123 token issue
+  environment:
+        - OS_USERNAME: admin
+        - OS_PROJECT_NAME: admin
+        - OS_USER_DOMAIN_NAME: Default
+        - OS_PROJECT_DOMAIN_NAME: Default
+        - OS_IDENTITY_API_VERSION: 3
+- name: creating scripts
+  copy:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+  loop:
+        - { src: '~/Fyp/fyp-ansible/roles/keystone/files/admin-openrc', dest: '~/admin-openrc' }
+        - { src: '~/Fyp/fyp-ansible/roles/keystone/files/demo-openrc', dest: '~/demo-openrc' }

@@ -1,0 +1,38 @@
+---
+- name: update repository
+  apt: 
+    update_cache: yes 
+    force_apt_get: yes 
+    cache_valid_time: 3600
+
+- name: installing ifupdown
+  apt: 
+      name: ifupdown
+      state: present
+- name: Network Configuring
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    backup: yes
+  loop:
+    - { src: 'hostname.j2', dest: '/etc/hostname' }
+    - { src: 'hosts.j2', dest: '/etc/hosts' }
+    - { src: 'interfaces.j2', dest: '/etc/network/interfaces' }
+- name: Rebooting machine
+  reboot:
+- name: Installing Chrony                                 
+  apt:                                                    
+      name: chrony                                    
+      state: present
+- name: Configuring Chrony
+  template:
+      src: chrony.conf.j2
+      dest: /etc/chrony/chrony.conf
+      backup: yes
+- name: Restarting NTP                                    
+  service:                                                
+      name: chrony                                    
+      state: restarted
+- name: Sync Time                                         
+  command:                                                
+      cmd: chronyc sources

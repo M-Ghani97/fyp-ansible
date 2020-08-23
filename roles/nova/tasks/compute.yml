@@ -1,0 +1,61 @@
+---
+- name: Installing Nova-Compute
+  apt:
+    name: nova-compute
+    state: present
+
+- name: Deleting Default Configuration
+  lineinfile:
+    path: /etc/nova/nova.conf
+    regexp: '\[DEFAULT\]'
+    state: absent
+    backup: yes
+
+  
+- name: Adding Default Configuration
+  blockinfile:
+    path: /etc/nova/nova.conf
+    insertbefore: BOF
+    block: |
+      [DEFAULT]
+      my_ip = {{ ansible_default_ipv4.address}}
+      use_neutron = true
+      firewall_driver = nova.virt.firewall.NoopFirewallDriver
+      transport_url = rabbit://openstack:RABBIT_PASS@controller
+      
+
+- name: Configuring nova.conf
+  blockinfile:
+    path: /etc/nova/nova.conf
+    block: |
+      {{item.blk}}
+    insertafter: '{{item.insaft}}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.insaft}}"
+  loop:
+  - {blk: "auth_url = http://controller:5000/v3\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = nova\npassword = 123", insaft: '\[keystone_authtoken\]'}
+  - {blk: "enabled = true\nserver_listen = 0.0.0.0\nserver_proxyclient_address = $my_ip\nnovncproxy_base_url = http://controller:6080/vnc_auto.html", insaft: '\[vnc\]'}
+  - {blk: "region_name = RegionOne\nproject_domain_name = Default\nproject_name = service\nauth_type = password\nuser_domain_name = Default\nauth_url = http://controller:5000/v3\nusername = placement\npassword = 123", insaft: '\[placement\]'}
+  - {blk: "url = http://controller:9696\nauth_url = http://controller:5000\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nregion_name = RegionOne\nproject_name = service\nusername = neutron\npassword = 123", insaft: '\[neutron\]'}
+
+
+- name: Configuring nova.conf 1
+  lineinfile: 
+    path: /etc/nova/nova.conf
+    line: "{{item.line}}"
+    insertafter: "{{item.insaft}}"
+    state: present
+  loop:
+    - {line: "auth_strategy = keystone", insaft: '\[api\]'}
+    - {line: "api_servers = http://controller:9292", insaft: '\[glance\]'}
+    - {line: "lock_path = /var/lib/nova/tmp", insaft: '\[oslo_concurrency\]'}
+
+- name: Configuring VIirt Type
+  replace:
+    path: /etc/nova/nova-compute.conf
+    replace: 'virt_type=qemu'
+    regexp: 'virt_type\=kvm'
+
+- name: Restarting Nova-Compute Service
+  service:
+    name: nova-compute
+    state: restarted

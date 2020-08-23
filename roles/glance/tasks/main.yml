@@ -1,0 +1,90 @@
+---
+- name: create DB
+  mysql_db:
+    name: glance
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+- name: adding user and granting privileges
+  mysql_user:
+    name: glance
+    password: GLANCE_DBPASS
+    priv: "glance.*:ALL"
+    state: present
+    host: "{{item}}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop:
+    - 'localhost'
+    - '%'
+- name: creating glance user, entity and API endpoints
+  command: 
+    cmd: "{{item}}"
+  loop:
+    - openstack user create --domain default --password 123 glance
+    - openstack role add --project service --user glance admin
+    - openstack service create --name glance --description "OpenStack Image" image
+    - openstack endpoint create --region RegionOne image public http://controller:9292
+    - openstack endpoint create --region RegionOne image internal http://controller:9292
+    - openstack endpoint create --region RegionOne image admin http://controller:9292
+  environment:
+    - OS_PROJECT_DOMAIN_NAME: Default
+    - OS_USER_DOMAIN_NAME: Default
+    - OS_PROJECT_NAME: admin
+    - OS_USERNAME: admin
+    - OS_PASSWORD: ADMIN_PASS
+    - OS_AUTH_URL: http://controller:5000/v3
+    - OS_IDENTITY_API_VERSION: 3
+    - OS_IMAGE_API_VERSION: 2
+- name: installing glance
+  apt:
+    name: glance
+    state: present
+- name: configuring glance
+  replace:
+    path: "{{item}}"
+    after: '[database]'
+    regexp: 'connection = sqlite:////var/lib/glance/glance.sqlite'
+    replace: 'connection = mysql+pymysql://glance:GLANCE_DBPASS@controller/glance'
+    backup: yes
+  loop:
+    - /etc/glance/glance-api.conf
+    - /etc/glance/glance-registry.conf
+- name: configuring glance 1
+  blockinfile:
+    path: "{{item.path}}"
+    block: |
+      {{item.blk}}
+    insertafter: '{{item.insaft}}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.insaft}}"
+    backup: yes
+  loop:
+    - {path: /etc/glance/glance-api.conf, blk: "www_authenticate_uri = http://controller:5000\nauth_url = http://controller:5000\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = glance\npassword = 123", insaft: '\[keystone_authtoken\]'}
+    - {path: /etc/glance/glance-api.conf, blk: "flavor = keystone", insaft: '\[paste_deploy\]'}
+    - {path: /etc/glance/glance-api.conf, blk: "stores = file,http\ndefault_store = file\nfilesystem_store_datadir = /var/lib/glance/imadges/", insaft: '\[glance_store\]'}
+    - {path: /etc/glance/glance-registry.conf, blk: "www_authenticate_uri = http://controller:5000\nauth_url = http://controller:5000\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = glance\npassword = 123", insaft: '\[keystone_authtoken\]'}
+    - {path: /etc/glance/glance-registry.conf, blk: "flavor = keystone", insaft: '\[paste_deploy\]'}
+- name: populating image service database
+  command:
+    cmd: 'su -s /bin/sh -c "glance-manage db_sync" glance'
+- name: restart images service
+  service: 
+    name: "{{item}}"
+    state: restarted
+  loop:
+    - glance-registry
+    - glance-api
+- name: downloading cirrOS image
+  get_url:
+    url: http://download.cirros-cloud.net/0.5.1/cirros-0.5.1-x86_64-disk.img
+    dest: "{{ansible_env.PWD}}"
+- name: creating image
+  command:
+    cmd: openstack image create "cirros" --file "{{ansible_env.PWD}}/cirros-0.5.1-x86_64-disk.img" --disk-format qcow2 --container-format bare --public
+  environment:
+    - OS_PROJECT_DOMAIN_NAME: Default
+    - OS_USER_DOMAIN_NAME: Default
+    - OS_PROJECT_NAME: admin
+    - OS_USERNAME: admin
+    - OS_PASSWORD: ADMIN_PASS
+    - OS_AUTH_URL: http://controller:5000/v3
+    - OS_IDENTITY_API_VERSION: 3
+    - OS_IMAGE_API_VERSION: 2

@@ -1,0 +1,68 @@
+- name: Install the components
+  apt:
+    name: neutron-linuxbridge-agent
+    state: present
+
+- name: oslo_concurrency
+  lineinfile:
+    path: /etc/neutron/neutron.conf
+    backup: yes
+    line: lock_path = /var/lib/neutron/tmp
+    insertafter: '\[oslo_concurrency\]'
+    state: present
+
+- name: Deleting Default Configuration
+  lineinfile:
+    path: /etc/neutron/neutron.conf
+    state: absent
+    regexp: '{{ item }}'
+    state: absent
+  loop:
+      - '\[DEFAULT\]'
+      - 'core_plugin\s+\=\s+ml2'
+      - '\[keystone_authtoken\]'
+    
+- name: Adding Default Configuration
+  blockinfile: 
+    path: /etc/neutron/neutron.conf
+    insertbefore: BOF
+    block: |
+      [DEFAULT]
+      core_plugin = ml2
+      transport_url = rabbit://openstack:RABBIT_PASS@controller
+      auth_strategy = keystone
+
+      [keystone_authtoken]
+      www_authenticate_uri = http://controller:5000
+      auth_url = http://controller:5000
+      memcached_servers = controller:11211
+      auth_type = password
+      project_domain_name = default
+      user_domain_name = default
+      project_name = service
+      username = neutron
+      password = 123
+      
+- name: Configure the Modular Layer 2 (ML2) plug-in
+  blockinfile:
+    path: /etc/neutron/plugins/ml2/linuxbridge_agent.ini
+    backup: yes
+    block: |
+      {{item.blk}}
+    insertafter: '{{item.insaft}}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.insaft}}"
+  loop:
+    - {blk: "physical_interface_mappings = provider:{{ ansible_interfaces | difference(['lo',ansible_default_ipv4.interface]) | first }}", insaft: '\[linux_bridge\]'}
+    - {blk: "enable_vxlan = true\nlocal_ip = {{ansible_default_ipv4.address}}\nl2_population = true", insaft: '\[vxlan\]'}
+    - {blk: "enable_security_group = true\nfirewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver", insaft: '\[securitygroup\]'}
+
+
+    #neutron section config is done in nova role
+
+- name: Restarting Compute and Linux bridge agent service
+  service:
+    name: '{{ item }}'
+    state: restarted
+  loop:
+    - nova-compute
+    - neutron-linuxbridge-agent

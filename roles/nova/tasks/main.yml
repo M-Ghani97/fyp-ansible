@@ -1,0 +1,147 @@
+---
+- name: Creating Databases
+  mysql_db:
+    name: "{{item}}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop:
+    - nova_api
+    - nova
+    - nova_cell0
+    - placement
+
+
+- name: adding user and granting privileges
+  mysql_user:
+    name: "{{item.name}}"
+    password: "{{item.pass}}"
+    priv: "*.*:ALL"
+    state: present
+    host: "{{item.host}}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop:
+    - { name: 'nova', pass: 'NOVA_DBPASS', host: 'localhost'}
+    - { name: 'nova', pass: 'NOVA_DBPASS', host: '%'}
+    - { name: 'placement', pass: 'PLACEMENT_DBPASS', host: 'localhost'}
+    - { name: 'placement', pass: 'PLACEMENT_DBPASS', host: '%'}
+
+
+- name: Creating the Compute service credentials
+  command:
+    cmd: "{{item}}"
+  loop:
+    - openstack user create --domain default --password 123 nova
+    - openstack role add --project service --user nova admin
+    - openstack service create --name nova --description "OpenStack Compute" compute
+    - openstack endpoint create --region RegionOne compute public http://controller:8774/v2.1
+    - openstack endpoint create --region RegionOne compute internal http://controller:8774/v2.1
+    - openstack endpoint create --region RegionOne compute admin http://controller:8774/v2.1
+    - openstack user create --domain default --password 123 placement
+    - openstack role add --project service --user placement admin
+    - openstack service create --name placement --description "Placement API" placement
+    - openstack endpoint create --region RegionOne placement public http://controller:8778
+    - openstack endpoint create --region RegionOne placement internal http://controller:8778
+    - openstack endpoint create --region RegionOne placement admin http://controller:8778
+  environment: 
+    - OS_PROJECT_DOMAIN_NAME: Default
+    - OS_USER_DOMAIN_NAME: Default
+    - OS_PROJECT_NAME: admin
+    - OS_USERNAME: admin
+    - OS_PASSWORD: ADMIN_PASS
+    - OS_AUTH_URL: http://controller:5000/v3
+    - OS_IDENTITY_API_VERSION: 3
+    - OS_IMAGE_API_VERSION: 2
+
+
+- name: installing compute pakages
+  apt:
+    name: "{{item}}"
+    state: present
+  loop:
+    - nova-api
+    - nova-conductor
+    - nova-consoleauth
+    - nova-novncproxy
+    - nova-scheduler 
+    - nova-placement-api
+
+
+- name: Configuring Database Connection-String
+  replace:
+    path: /etc/nova/nova.conf
+    after: "{{item.after}}"
+    regexp: "{{item.regexp}}"
+    replace: "{{item.replace}}"
+    backup: yes
+  loop:
+    - {after: '\[api_database\]', regexp: 'connection\s+\=\s+sqlite\:////var/lib/nova/nova_api\.sqlite', replace: 'connection = mysql+pymysql://nova:NOVA_DBPASS@controller/nova_api'}
+    - {after: '\[database\]', regexp: 'connection\s+\=\s+sqlite\:////var/lib/nova/nova\.sqlite', replace: 'connection = mysql+pymysql://nova:NOVA_DBPASS@controller/nova'}
+
+
+- name: Configuring nova.conf
+  lineinfile: 
+    path: /etc/nova/nova.conf
+    line: "{{item.line}}"
+    insertafter: "{{item.insafter}}"
+    state: present
+  loop:
+    - { line: 'connection = mysql+pymysql://placement:PLACEMENT_DBPASS@controller/placement', insafter: '\[placement_database\]'}
+    - { line: 'auth_strategy = keystone', insafter: '\[api\]'}
+    - { line: 'api_servers = http://controller:9292', insafter: '\[glance\]'}
+    - { line: 'lock_path = /var/lib/nova/tmp', insafter: '\[oslo_concurrency\]'}
+
+
+- name: Deleting Default Configuration
+  lineinfile:
+    path: /etc/nova/nova.conf
+    regexp: '\[DEFAULT\]'
+    state: absent
+
+
+- name: Adding Default Configuration
+  blockinfile: 
+    path: /etc/nova/nova.conf
+    insertbefore: BOF
+    block: |
+      [DEFAULT]
+      transport_url = rabbit://openstack:RABBIT_PASS@controller
+      my_ip = {{ ansible_default_ipv4.address }}
+      use_neutron = true
+      firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+
+- name: Configuring nova.conf
+  blockinfile:
+    path: /etc/nova/nova.conf
+    block: |
+      {{item.blk}}
+    insertafter: '{{item.insaft}}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{item.insaft}}"
+  loop:
+    - {blk: "auth_url = http://controller:5000/v3\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = nova\npassword = 123", insaft: '\[keystone_authtoken\]'}
+    - {blk: "enabled = true\nserver_listen = $my_ip\nserver_proxyclient_address = $my_ip", insaft: '\[vnc\]'}
+    - {blk: "region_name = RegionOne\nproject_domain_name = Default\nproject_name = service\nauth_type = password\nuser_domain_name = Default\nauth_url = http://controller:5000/v3\nusername = placement\npassword = 123", insaft: '\[placement\]'}
+    - {blk: "url = http://controller:9696\nauth_url = http://controller:5000\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nregion_name = RegionOne\nproject_name = service\nusername = neutron\npassword = 123\nservice_metadata_proxy = true\nmetadata_proxy_shared_secret = METADATA_SECRET", insaft: '\[neutron\]'}
+
+
+- name: Populating nova-api and placement database
+  command:
+    cmd: "{{item}}"
+  loop:
+    - su -s /bin/sh -c "nova-manage api_db sync" nova
+    - su -s /bin/sh -c "nova-manage cell_v2 map_cell0" nova
+    - su -s /bin/sh -c "nova-manage cell_v2 create_cell --name=cell1 --verbose" nova
+    - su -s /bin/sh -c "nova-manage db sync" nova
+    - su -s /bin/sh -c "nova-manage cell_v2 list_cells" nova
+
+
+- name: Restarting Compute Services
+  service:
+    name: "{{item.name}}"
+    state: "{{item.state}}"
+  loop:
+    - {name: 'nova-api', state: restarted}
+    - {name: 'nova-consoleauth', state: restarted}
+    - {name: 'nova-scheduler', state: restarted}
+    - {name: 'nova-conductor', state: restarted}
+    - {name: 'nova-novncproxy', state: restarted}

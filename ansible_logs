@@ -1,0 +1,457 @@
+LAY [controller] ****************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : update repository] ************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : installing ifupdown] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Network Configuring] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'src': 'hostname.j2', 'dest': '/etc/hostname'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'src': 'hosts.j2', 'dest': '/etc/hosts'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'src': 'interfaces.j2', 'dest': '/etc/network/interfaces'})
+
+TASK [set_env_controller : Rebooting machine] ************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Installing Chrony] ************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Configuring NTP] **************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Restarting NTP] ***************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Sync Time] ********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Adding Openstack Repo] ********************************************************************************************************************************************
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Adding Repo] ******************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Updating all packages to the latest version] **********************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Installing Python-Client] *****************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Installing Database] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=mariadb-server)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=python-pymysql)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=python3-pymysql)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=python-apt)
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=python3-apt)
+
+TASK [set_env_controller : Configuring Database] *********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Restarting MySQL] *************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Installing RabbitMQ] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Restarting RabbitMQ] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Configuring RabbitMQ] *********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=rabbitmqctl add_user openstack RABBIT_PASS)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=rabbitmqctl set_permissions openstack ".*" ".*" ".*")
+
+TASK [set_env_controller : Installing Memcached] *********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=memcached)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=python-memcache)
+
+TASK [set_env_controller : Configuring Memcached] ********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Restarting Memcached] *********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Installing Etcd] **************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Confguring Etcd] **************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_controller : Enabling & Restarting Etcd] ***************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+PLAY [compute] *******************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+ok: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_compute : update repository] ***************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_compute : installing ifupdown] *************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_compute : Network Configuring] *************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'src': 'hostname.j2', 'dest': '/etc/hostname'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'src': 'hosts.j2', 'dest': '/etc/hosts'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'src': 'interfaces.j2', 'dest': '/etc/network/interfaces'})
+
+TASK [set_env_compute : Rebooting machine] ***************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_compute : Installing Chrony] ***************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_compute : Configuring Chrony] **************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_compute : Restarting NTP] ******************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [set_env_compute : Sync Time] ***********************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+PLAY [controller] ****************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : create DB] ******************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : adding user and granting privileges] ****************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=localhost)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=%)
+[WARNING]: Module did not set no_log for update_password
+
+TASK [keystone : installing pakages] *********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=keystone)
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=apache2)
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=libapache2-mod-wsgi)
+
+TASK [keystone : setting up conf file] *******************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : setting up conf file1] ******************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : populating keystone database] ***********************************************************************************************************************************************
+[WARNING]: Consider using 'become', 'become_method', and 'become_user' rather than running su
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : initializing repos] *********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=keystone-manage credential_setup --keystone-user keystone --keystone-group keystone)
+
+TASK [keystone : bootstrap identity service] *************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : configure apache2] **********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : restart apache2] ************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [keystone : creating domain, project, user and roles] ***********************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack domain create --description "An Example Domain" example)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack project create --domain default --description "Service Project" service)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack project create --domain default --description "Demo Project" myproject)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack user create --domain default --password 123 myuser)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack role create myrole)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack role add --project myproject --user myuser myrole)
+
+TASK [keystone : varifying operation] ********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack --os-auth-url http://controller:5000/v3 --os-project-domain-name Default --os-user-domain-name Default --os-project-name admin --os-username admin --os-password ADMIN_PASS token issue)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack --os-auth-url http://controller:5000/v3 --os-project-domain-name Default --os-user-domain-name Default --os-project-name myproject --os-username myuser --os-password 123 token issue)
+
+TASK [keystone : creating scripts] ***********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'src': '~/fyp/ansible/roles/keystone/files/admin-openrc', 'dest': '~/admin-openrc'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'src': '~/fyp/ansible/roles/keystone/files/demo-openrc', 'dest': '~/demo-openrc'})
+
+TASK [glance : create DB] ********************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [glance : adding user and granting privileges] ******************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=localhost)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=%)
+
+TASK [glance : creating glance user, entity and API endpoints] *******************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack user create --domain default --password 123 glance)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack role add --project service --user glance admin)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack service create --name glance --description "OpenStack Image" image)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne image public http://controller:9292)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne image internal http://controller:9292)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne image admin http://controller:9292)
+
+TASK [glance : installing glance] ************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [glance : configuring glance] ***********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=/etc/glance/glance-api.conf)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=/etc/glance/glance-registry.conf)
+
+TASK [glance : configuring glance 1] *********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'path': '/etc/glance/glance-api.conf', 'blk': 'www_authenticate_uri = http://controller:5000\nauth_url = http://controller:5000\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = glance\npassword = 123', 'insaft': '\\[keystone_authtoken\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'path': '/etc/glance/glance-api.conf', 'blk': 'flavor = keystone', 'insaft': '\\[paste_deploy\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'path': '/etc/glance/glance-api.conf', 'blk': 'stores = file,http\ndefault_store = file\nfilesystem_store_datadir = /var/lib/glance/imadges/', 'insaft': '\\[glance_store\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'path': '/etc/glance/glance-registry.conf', 'blk': 'www_authenticate_uri = http://controller:5000\nauth_url = http://controller:5000\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = glance\npassword = 123', 'insaft': '\\[keystone_authtoken\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'path': '/etc/glance/glance-registry.conf', 'blk': 'flavor = keystone', 'insaft': '\\[paste_deploy\\]'})
+
+TASK [glance : populating image service database] ********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [glance : restart images service] *******************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=glance-registry)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=glance-api)
+
+TASK [glance : downloading cirrOS image] *****************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [glance : creating image] ***************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Creating Databases] *************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova_api)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova_cell0)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=placement)
+
+TASK [nova : adding user and granting privileges] ********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'nova', 'pass': 'NOVA_DBPASS', 'host': 'localhost'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'nova', 'pass': 'NOVA_DBPASS', 'host': '%'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'placement', 'pass': 'PLACEMENT_DBPASS', 'host': 'localhost'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'placement', 'pass': 'PLACEMENT_DBPASS', 'host': '%'})
+
+TASK [nova : Creating the Compute service credentials] ***************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack user create --domain default --password 123 nova)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack role add --project service --user nova admin)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack service create --name nova --description "OpenStack Compute" compute)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne compute public http://controller:8774/v2.1)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne compute internal http://controller:8774/v2.1)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne compute admin http://controller:8774/v2.1)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack user create --domain default --password 123 placement)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack role add --project service --user placement admin)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack service create --name placement --description "Placement API" placement)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne placement public http://controller:8778)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne placement internal http://controller:8778)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne placement admin http://controller:8778)
+
+TASK [nova : installing compute pakages] *****************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova-api)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova-conductor)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova-consoleauth)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova-novncproxy)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova-scheduler)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova-placement-api)
+
+TASK [nova : Configuring Database Connection-String] *****************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'after': '\\[api_database\\]', 'regexp': 'connection\\s+\\=\\s+sqlite\\:////var/lib/nova/nova_api\\.sqlite', 'replace': 'connection = mysql+pymysql://nova:NOVA_DBPASS@controller/nova_api'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'after': '\\[database\\]', 'regexp': 'connection\\s+\\=\\s+sqlite\\:////var/lib/nova/nova\\.sqlite', 'replace': 'connection = mysql+pymysql://nova:NOVA_DBPASS@controller/nova'})
+
+TASK [nova : Configuring nova.conf] **********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'line': 'connection = mysql+pymysql://placement:PLACEMENT_DBPASS@controller/placement', 'insafter': '\\[placement_database\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'line': 'auth_strategy = keystone', 'insafter': '\\[api\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'line': 'api_servers = http://controller:9292', 'insafter': '\\[glance\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'line': 'lock_path = /var/lib/nova/tmp', 'insafter': '\\[oslo_concurrency\\]'})
+
+TASK [nova : Deleting Default Configuration] *************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Adding Default Configuration] ***************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Configuring nova.conf] **********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'auth_url = http://controller:5000/v3\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = nova\npassword = 123', 'insaft': '\\[keystone_authtoken\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'enabled = true\nserver_listen = $my_ip\nserver_proxyclient_address = $my_ip', 'insaft': '\\[vnc\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'region_name = RegionOne\nproject_domain_name = Default\nproject_name = service\nauth_type = password\nuser_domain_name = Default\nauth_url = http://controller:5000/v3\nusername = placement\npassword = 123', 'insaft': '\\[placement\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'url = http://controller:9696\nauth_url = http://controller:5000\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nregion_name = RegionOne\nproject_name = service\nusername = neutron\npassword = 123\nservice_metadata_proxy = true\nmetadata_proxy_shared_secret = METADATA_SECRET', 'insaft': '\\[neutron\\]'})
+
+TASK [nova : Populating nova-api and placement database] *************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=su -s /bin/sh -c "nova-manage api_db sync" nova)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=su -s /bin/sh -c "nova-manage cell_v2 map_cell0" nova)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=su -s /bin/sh -c "nova-manage cell_v2 create_cell --name=cell1 --verbose" nova)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=su -s /bin/sh -c "nova-manage db sync" nova)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=su -s /bin/sh -c "nova-manage cell_v2 list_cells" nova)
+
+TASK [nova : Restarting Compute Services] ****************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'nova-api', 'state': 'restarted'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'nova-consoleauth', 'state': 'restarted'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'nova-scheduler', 'state': 'restarted'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'nova-conductor', 'state': 'restarted'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'name': 'nova-novncproxy', 'state': 'restarted'})
+
+PLAY [compute] *******************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+ok: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Installing Nova-Compute] ********************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Deleting Default Configuration] *************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Adding Default Configuration] ***************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Configuring nova.conf] **********************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'blk': 'auth_url = http://controller:5000/v3\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = Default\nuser_domain_name = Default\nproject_name = service\nusername = nova\npassword = 123', 'insaft': '\\[keystone_authtoken\\]'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'blk': 'enabled = true\nserver_listen = 0.0.0.0\nserver_proxyclient_address = $my_ip\nnovncproxy_base_url = http://controller:6080/vnc_auto.html', 'insaft': '\\[vnc\\]'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'blk': 'region_name = RegionOne\nproject_domain_name = Default\nproject_name = service\nauth_type = password\nuser_domain_name = Default\nauth_url = http://controller:5000/v3\nusername = placement\npassword = 123', 'insaft': '\\[placement\\]'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'blk': 'url = http://controller:9696\nauth_url = http://controller:5000\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nregion_name = RegionOne\nproject_name = service\nusername = neutron\npassword = 123', 'insaft': '\\[neutron\\]'})
+
+TASK [nova : Configuring nova.conf 1] ********************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'line': 'auth_strategy = keystone', 'insaft': '\\[api\\]'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'line': 'api_servers = http://controller:9292', 'insaft': '\\[glance\\]'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'line': 'lock_path = /var/lib/nova/tmp', 'insaft': '\\[oslo_concurrency\\]'})
+
+TASK [nova : Configuring Virt_Type] **********************************************************************************************************************************************************
+ok: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [nova : Restarting Nova-Compute Service] ************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+PLAY [controller] ****************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : installing openstack-dashboard] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : setting up conf file] ********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : setting up] ******************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : setting up conf file] ********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : setting up conf file] ********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : setting up conf file 2] ******************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : setting up conf file] ********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : setting up conf file] ********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [horizon : restarting apache] ***********************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : create DB] *******************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : adding user and granting privileges] *****************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=localhost)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=%)
+
+TASK [neutron : creating neutron user, entity and API endpoints] *****************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack user create --domain default --password 123 neutron)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack role add --project service --user neutron admin)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack service create --name neutron --description "OpenStack Networking" network)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne network public http://controller:9696)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne network internal http://controller:9696)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=openstack endpoint create --region RegionOne network admin http://controller:9696)
+
+TASK [neutron : installing neutron components] ***********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-server)
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-plugin-ml2)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-linuxbridge-agent)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-l3-agent)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-dhcp-agent)
+ok: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-metadata-agent)
+
+TASK [neutron : configuring server components] ***********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Deleting Default Configuration] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=\[DEFAULT\])
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=core_plugin\s+\=\s+ml2)
+
+TASK [neutron : Adding Default Configuration] ************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Configuring neutron.conf] ****************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'www_authenticate_uri = http://controller:5000\nauth_url = http://controller:5000\nmemcached_servers = controller:11211\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nproject_name = service\nusername = neutron\npassword = 123', 'insaft': '\\[keystone_authtoken\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'auth_url = http://controller:5000\nauth_type = password\nproject_domain_name = default\nuser_domain_name = default\nregion_name = RegionOne\nproject_name = service\nusername = nova\npassword = 123', 'insaft': '\\[nova\\]'})
+
+TASK [neutron : oslo_concurrency] ************************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Configure the Modular Layer 2 (ML2) plug-in] *********************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'type_drivers = flat,vlan,vxlan\ntenant_network_types = vxlan\nmechanism_drivers = linuxbridge,l2population\nextension_drivers = port_security', 'insaft': '\\[ml2\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'flat_networks = provider\n', 'insaft': '\\[ml2_type_flat\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'vni_ranges = 1:1000\n', 'insaft': '\\[ml2_type_vxlan\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'enable_ipset = true\n', 'insaft': '\\[securitygroup\\]'})
+
+TASK [neutron : Configure the Modular Layer 2 (ML2) plug-in] *********************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'physical_interface_mappings = provider:ens6', 'insaft': '\\[linux_bridge\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'enable_vxlan = true\nlocal_ip = 172.31.16.179\nl2_population = true', 'insaft': '\\[vxlan\\]'})
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item={'blk': 'enable_security_group = true\nfirewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver', 'insaft': '\\[securitygroup\\]'})
+
+TASK [neutron : Deleting Default Configuration] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=/etc/neutron/l3_agent.ini)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=/etc/neutron/dhcp_agent.ini)
+
+TASK [neutron : Configure the layer-3 agent] *************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Configure the DHCP agent] ****************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Deleting Default Configuration] **********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Configure the metadata agent] ************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : populating neutron database] *************************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Restarting Netwoking Services] ***********************************************************************************************************************************************
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=nova-api)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-server)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-linuxbridge-agent)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-dhcp-agent)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-metadata-agent)
+changed: [ec2-15-206-207-115.ap-south-1.compute.amazonaws.com] => (item=neutron-l3-agent)
+
+PLAY [compute] *******************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+ok: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Install the components] ******************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : oslo_concurrency] ************************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Deleting Default Configuration] **********************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item=\[DEFAULT\])
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item=core_plugin\s+\=\s+ml2)
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item=\[keystone_authtoken\])
+
+TASK [neutron : Adding Default Configuration] ************************************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com]
+
+TASK [neutron : Configure the Modular Layer 2 (ML2) plug-in] *********************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'blk': 'physical_interface_mappings = provider:virbr0-nic', 'insaft': '\\[linux_bridge\\]'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'blk': 'enable_vxlan = true\nlocal_ip = 172.31.24.229\nl2_population = true', 'insaft': '\\[vxlan\\]'})
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item={'blk': 'enable_security_group = true\nfirewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver', 'insaft': '\\[securitygroup\\]'})
+
+TASK [neutron : Restarting Compute and Linux bridge agent service] ***************************************************************************************************************************
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item=nova-compute)
+changed: [ec2-13-235-57-139.ap-south-1.compute.amazonaws.com] => (item=neutron-linuxbridge-agent)
+
+PLAY RECAP ***********************************************************************************************************************************************************************************
+ec2-13-235-57-139.ap-south-1.compute.amazonaws.com : ok=24   changed=20   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+ec2-15-206-207-115.ap-south-1.compute.amazonaws.com : ok=88   changed=84   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

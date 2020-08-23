@@ -1,0 +1,126 @@
+---
+- name: update repository
+  apt: 
+    update_cache: yes 
+    force_apt_get: yes 
+    cache_valid_time: 3600
+
+- name: installing ifupdown
+  apt: 
+      name: ifupdown
+      state: present
+- name: Network Configuring
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    backup: yes
+  loop:
+    - { src: 'hostname.j2', dest: '/etc/hostname' }
+    - { src: 'hosts.j2', dest: '/etc/hosts' }
+    - { src: 'interfaces.j2', dest: '/etc/network/interfaces' }
+- name: Rebooting machine
+  reboot:
+- name: Installing Chrony                                 
+  apt:                                                    
+      name: chrony                                    
+      state: present                                                                            
+- name: Configuring NTP                                   
+  lineinfile:                                             
+      path: /etc/chrony/chrony.conf                   
+      line: allow {{ansible_default_ipv4.address}}/20                         
+      state: present  
+      backup: yes                                  
+- name: Restarting NTP                                    
+  service:                                                
+      name: chrony                                    
+      state: restarted                                
+- name: Sync Time                                         
+  command:                                                
+      cmd: chronyc sources                                                                              
+- name: Adding Openstack Repo                             
+  apt:                                                    
+      name: software-properties-common                
+      state: present                                                                                        
+- name: Adding Repo
+  command:
+      cmd: add-apt-repository cloud-archive:rocky -y
+- name: Updating all packages to the latest version
+  apt:
+    upgrade: dist
+- name: Installing Python-Client                          
+  apt:                                                    
+      name: python3-openstackclient                   
+      state: present                                                                                  
+- name: Installing Database                               
+  apt:                                                    
+      name: "{{item}}"                                
+      state: present                                  
+  loop:                                                   
+      - mariadb-server                                
+      - python-pymysql
+      - python3-pymysql
+      - python-apt
+      - python3-apt
+
+                                            # name:
+                                            #   - mysql-server
+                                            #   - python-pymysql
+                                            #   - python3-pymysql
+                                            #   - python-apt
+                                            #   - python3-apt
+
+- name: Configuring Database                                       
+  template:                                                        
+      src: 99-openstack.cnf.j2                                    
+      dest: /etc/mysql/mariadb.conf.d/99-openstack.cnf
+      backup: yes                                                                 
+- name: Restarting MySQL                                           
+  service:                                                         
+      name: mysql                                              
+      state: restarted                                                                                                    
+- name: Installing RabbitMQ                                        
+  apt:                                                             
+      name: rabbitmq-server                                    
+      state: present                                                                                                      
+- name: Restarting RabbitMQ                                        
+  service:                                                         
+      name: rabbitmq-server                                    
+      state: restarted                                           
+- name: Configuring RabbitMQ                                       
+  command:                                                         
+      cmd: "{{item}}"                                          
+  loop:                                                            
+      - rabbitmqctl add_user openstack RABBIT_PASS             
+      - rabbitmqctl set_permissions openstack ".*" ".*" ".*"   
+  ignore_errors: yes                                                
+- name: Installing Memcached                                       
+  apt:                                                             
+      name: "{{item}}"                                         
+      state: present                                           
+  loop:                                                            
+      - memcached                                              
+      - python-memcache
+- name: Configuring Memcached           
+  replace:                              
+      path: /etc/memcached.conf     
+      regexp: '\-l\s+127\.0\.0\.1'  
+      replace: '-l {{ansible_default_ipv4.address}}' 
+      backup: yes                                          
+- name: Restarting Memcached            
+  service:                              
+      name: memcached               
+      state: restarted                                              
+- name: Installing Etcd                 
+  apt:                                  
+      name: etcd                    
+      state: present                                               
+- name: Confguring Etcd                 
+  template:                             
+      src: etcd.j2                   
+      dest: /etc/default/etcd  
+      backup: yes                                     
+- name: Enabling & Restarting Etcd      
+  service:                              
+      name: etcd                    
+      state: restarted     
+
