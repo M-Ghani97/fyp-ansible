@@ -48,8 +48,9 @@
   apt:
     upgrade: dist
 - name: Installing Python-Client                          
-  pip:
-    name: python-openstackclient    
+  apt:
+    name: python-openstackclient
+    state: present    
 - name: Installing Database                               
   apt:                                                    
       name: "{{item}}"                                

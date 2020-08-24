@@ -2,8 +2,7 @@ all:
   children:
     controller:
       hosts:
-        3.89.146.196
+        100.25.191.1
     compute:
       hosts:
-        54.236.47.128
-
+        54.237.28.88

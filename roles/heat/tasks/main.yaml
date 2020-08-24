@@ -15,7 +15,7 @@
   loop:
     - 'localhost'
     - '%'
-- name: creating glance user, entity and API endpoints
+- name: creating heat user, entity and API endpoints
   command: 
     cmd: "{{item}}"
   loop:
@@ -33,7 +33,7 @@
     - openstack user create --domain heat --password 123 heat_domain_admin
     - openstack role add --domain heat --user-domain heat --user heat_domain_admin admin
     - openstack role create heat_stack_owner
-    - openstack role add --project myservice --user myuser heat_stack_owner
+    - openstack role add --project myproject --user myuser heat_stack_owner
     - openstack role create heat_stack_user
   environment:
     - OS_PROJECT_DOMAIN_NAME: Default
@@ -52,16 +52,20 @@
     - heat-api 
     - heat-api-cfn 
     - heat-engine
-- name: copying Config files
-  copy:
-    src: "~/Fyp/fyp-ansible/roles/heat/files/heat.conf"
-    dest: "~/etc/heat/heat.conf"
-    mode: '0644'
+- name: Heat Configuring
+  template:
+    src: heat.conf.j2
+    dest: /etc/heat/heat.conf
+    backup: yes
 - name: populating heat database
   command:
-    cmd: "{{items}}"
+    cmd: "{{item}}"
   loop:
   - su -s /bin/sh -c "heat-manage db_sync" heat
+- name: Restarting Heat Services
+  command:
+    cmd: "{{item}}"
+  loop:
   - service heat-api restart
   - service heat-api-cfn restart
   - service heat-engine restart
