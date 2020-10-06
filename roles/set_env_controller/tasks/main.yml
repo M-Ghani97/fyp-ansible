@@ -61,6 +61,7 @@
       - python3-pymysql
       - python-apt
       - python3-apt
+      - python-pip
 
                                             # name:
                                             #   - mysql-server
