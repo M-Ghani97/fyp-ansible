@@ -16,11 +16,17 @@ scripts are written in YML language and we have used Ansible as our configuratio
 detours all barriers and provides users with their own cloud platform running on their machine.
 ### 1. Install Repo
 yum install mycloud -y
-## 2. Add Target Hosts
-./mycloud.sh node add <node_name> <nodes_ips>
+### 2. Add Target Hosts
+./mycloud.sh node add <node_name> <nodes_ip(s)>
 * ./mycloud.sh node add controller 1.1.1.1 2.2.2.2
-## 3. Introspect Target Nodes
+### 3. Introspect Target Nodes
 ./mycloud.sh node introspect <target_host_username>
 * ./mycloud.sh node introspect stack
-## 4. Start Deployment
+### 4. Start Deployment
 ./mycloud.sh deploy 
+
+## Other Commands
+### Remove Target Hosts
+./mycloud.sh node delete <nodes_ip(s)>
+### List Target Hosts
+./mycloud node list
