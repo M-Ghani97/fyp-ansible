@@ -2,8 +2,8 @@ all:
   children:
     controller:
       hosts:
-        10.81.1.45
-        10.81.1.37
+        10.81.1.45:
+        10.81.1.37:
     compute:
       hosts:
-        10.81.1.47
+        10.81.1.47:
