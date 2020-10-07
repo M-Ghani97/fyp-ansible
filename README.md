@@ -14,11 +14,13 @@ effortless installation of the cloud. Different scripts are created to automatic
 required components and configure them according to the specification set by the user. These
 scripts are written in YML language and we have used Ansible as our configuration manager. It
 detours all barriers and provides users with their own cloud platform running on their machine.
-## Install Repo
-* yum install mycloud -y
-## Add Target Hosts
-* ./mycloud.sh node add <node_name> <nodes_ips>
-## Introspect Target Nodes
-* ./mycloud.sh node introspect <target_host_username>
-## Start Deployment
-* ./mycloud.sh deploy 
+### 1. Install Repo
+yum install mycloud -y
+## 2. Add Target Hosts
+./mycloud.sh node add <node_name> <nodes_ips>
+* ./mycloud.sh node add controller 1.1.1.1 2.2.2.2
+## 3. Introspect Target Nodes
+./mycloud.sh node introspect <target_host_username>
+* ./mycloud.sh node introspect stack
+## 4. Start Deployment
+./mycloud.sh deploy 
